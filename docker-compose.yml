@@ -1,0 +1,22 @@
+version: '2.1'
+services:
+  db:
+    image: mysql:5.7
+    environment:
+       MYSQL_DATABASE: 'test_task_db'
+       MYSQL_USER: 'test_task'
+       MYSQL_PASSWORD: 'psswd123'
+       MYSQL_ROOT_PASSWORD: 'psswd123'
+    ports:
+      - "3306:3306"
+  test_task:
+    build:
+      context: .
+      dockerfile: ./ci/web/Dockerfile
+    volumes:
+      - "./web:/src"
+    command: "sh startup_commands.sh"
+    ports:
+      - "8010:8010"
+    depends_on:
+      - db

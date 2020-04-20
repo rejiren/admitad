@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if notifications %}
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Notification</th>
+      <th scope="col">Description</th>
+      <th scope="col">Participants</th>
+      <th scope="col">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for notification in notifications %}
+    <tr>
+      <th scope="row">{{ forloop.counter }}</th>
+      <td>
+          <b>{{ notification.title }}</b> <br/>
+          <span>{{ notification.onset_at }}</span>
+          <span>{{ notification.creator.email }}</span>
+      </td>
+      <td>
+          {{ notification.place }}<br/>
+          {{ notification.description }}
+      </td>
+      <td>{{ notification.participants }}</td>
+      <td>
+          {% if user == notification.creator %}
+          <div class="btn-group" role="group" aria-label="Basic example">
+              <a href="{% url 'notification-edit' notification.id %}" role="button" class="btn btn-secondary btn-primary">Edit</a>
+              <a href="{% url 'notification-delete' notification.id %}" role="button" class="btn btn-secondary btn-warning">Delete</a>
+            </div>
+{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% else %}
+    <p>No notification are available.</p>
+{% endif %}
+{% endblock %}
