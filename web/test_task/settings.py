@@ -132,3 +132,5 @@ STATICFILES_DIRS = [
 AUTH_USER_MODEL = 'users.User'
 LOGIN_REDIRECT_URL = '/notifications/'
 LOGIN_URL = '/login/'
+
+CELERY_BROKER_URL = 'redis://redis:6379'

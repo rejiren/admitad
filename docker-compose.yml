@@ -9,6 +9,13 @@ services:
        MYSQL_ROOT_PASSWORD: 'psswd123'
     ports:
       - "3306:3306"
+  redis:
+    image: redis:5.0.9
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./ci/redis/redis.conf:/redis.conf
+    command: [ "redis-server", "/redis.conf" ]
   test_task:
     build:
       context: .
@@ -20,3 +27,14 @@ services:
       - "8010:8010"
     depends_on:
       - db
+      - redis
+  worker:
+    build:
+      context: .
+      dockerfile: ./ci/worker/Dockerfile
+    volumes:
+      - "./web:/src"
+    command: "celery -A test_task worker -B"
+    depends_on:
+      - db
+      - redis
