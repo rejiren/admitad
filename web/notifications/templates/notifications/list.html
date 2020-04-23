@@ -18,7 +18,7 @@
     <tr>
       <th scope="row">{{ forloop.counter }}</th>
       <td>
-          <b>{{ notification.title }}</b> <br/>
+          {{ notification.id }}<b>{{ notification.title }}</b> <span>{{ notification.get_status_display }}</span><br/>
           <span>{{ notification.onset_at }}</span>
           <span>{{ notification.creator.email }}</span>
       </td>
@@ -26,7 +26,11 @@
           {{ notification.place }}<br/>
           {{ notification.description }}
       </td>
-      <td>{{ notification.participants }}</td>
+      <td>
+          {% for participant in notification.participant_set.all %}
+          {{ participant.user.email }}{{ participant.id }}{{ participant.status }} {{ participant.get_status_display }}<br/>
+          {% endfor %}
+      </td>
       <td>
           {% if user == notification.creator %}
           <div class="btn-group" role="group" aria-label="Basic example">

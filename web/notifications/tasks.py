@@ -1,37 +1,48 @@
-from datetime import timedelta
+from functools import reduce
+from datetime import timedelta, datetime
 import time
+from django.utils import timezone
 from celery.task import periodic_task, PeriodicTask
 from celery import shared_task
 from celery import group, chord
+from .emails import send_email
+from .models import Notification, ParticipantStatus
+from .storage import nearest_notification
 
 
 @shared_task
-def send_mail(email='asdasdasd'):
-    time.sleep(4)
+def send_mail_task(email, subject, body_text):
+    send_email(email, subject, body_text)
     print(email)
-    time.sleep(4)
-    return 1, email
+    return True
 
 
 @shared_task
 def send_mail_callback(result):
-    print(result)
+    """
+    На случай, если придётся обрабатывать статусы отправки отдельным пользователям
+    """
     return result
 
 
 @shared_task
-def send_event_callback(result):
-    print('event callback')
-    print(result)
-    return result
+def process_notification_callback(results, notification_id):
+    if reduce((lambda x, y: x & y), results, True):
+        Notification.objects.status_success(notification_id)
+    else:
+        Notification.objects.status_failed(notification_id)
+    return results
 
 
-@periodic_task(run_every=(timedelta(seconds=5)), name='hello')
-def hello():
-    print("Start")
-    job = group([
-        send_mail.s('email1') | send_mail_callback.s(),
-        send_mail.s('email2') | send_mail_callback.s()
-    ]) | send_event_callback.s()
-    job.apply_async()
-    print("End")
+@periodic_task(run_every=(timedelta(seconds=1)), name='process_notification')
+def process_notification():
+    if nearest_notification.onset_at < timezone.now():
+        notification = nearest_notification.pop()
+        job = group(
+            [send_mail_task.s(notification.creator.email, notification.title, notification.description)
+             | send_mail_callback.s()] +
+            [send_mail_task.s(participant.user.email, notification.title, notification.description)
+             | send_mail_callback.s()
+             for participant in notification.participant_set.filter(status=ParticipantStatus.ACTIVE)]
+        ) | process_notification_callback.s(notification.id)
+        job.apply_async()

@@ -135,3 +135,8 @@ LOGIN_URL = '/login/'
 
 CELERY_BROKER_URL = 'redis://redis:6379'
 CELERY_RESULT_BACKEND = 'redis://redis:6379'
+
+GMAIL_SMTP_HOST = 'smtp.gmail.com'
+GMAIL_SMTP_PORT = 465
+GMAIL_SMTP_PASSWORD = '^8yh_09JK'
+GMAIL_SMTP_USER = 'admitad.test.task@gmail.com'

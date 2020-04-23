@@ -1,26 +1,22 @@
 import smtplib
 
-gmail_user = 'admitad.test.task@gmail.com'
-gmail_password = '^8yh_09JK'
+from django.conf import settings
 
 
-def send_email():#host, subject, to_addr, from_addr, body_text):
-    host = "mySMTP.server.com"
-    subject = "Test email"
-    to_addr = "sfgsdfgdfsgdfsg@2go-mail.com"
-    from_addr = gmail_user
-    body_text = "Pupiru!!!!!"
-
-    BODY = "\r\n".join((
-        "From: %s" % from_addr,
+def send_email(to_addr, subject, body_text):
+    from_addr = settings.GMAIL_SMTP_USER
+    body = "\r\n".join((
+        "From: %s" % settings.GMAIL_SMTP_USER,
         "To: %s" % to_addr,
         "Subject: %s" % subject,
         "",
         body_text
     ))
-    server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-    server.ehlo()
-    server.login(gmail_user, gmail_password)
 
-    server.sendmail(from_addr, [to_addr], BODY)
+    server = smtplib.SMTP_SSL(settings.GMAIL_SMTP_HOST, settings.GMAIL_SMTP_PORT)
+
+    server.ehlo()
+    server.login(settings.GMAIL_SMTP_USER, settings.GMAIL_SMTP_PASSWORD)
+
+    server.sendmail(from_addr, [to_addr], body)
     server.quit()
