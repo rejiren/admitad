@@ -9,6 +9,10 @@ services:
        MYSQL_ROOT_PASSWORD: 'psswd123'
     ports:
       - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "test_task"]
+      timeout: 20s
+      retries: 10
   redis:
     image: redis:5.0.9
     ports:
@@ -16,6 +20,11 @@ services:
     volumes:
       - ./ci/redis/redis.conf:/redis.conf
     command: [ "redis-server", "/redis.conf" ]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
   test_task:
     build:
       context: .
@@ -25,9 +34,16 @@ services:
     command: "sh startup_commands.sh"
     ports:
       - "8010:8010"
+    healthcheck:
+      test: curl --fail -s http://localhost:8010/ || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 30
     depends_on:
-      - db
-      - redis
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
   worker:
     build:
       context: .
@@ -36,5 +52,9 @@ services:
       - "./web:/src"
     command: "celery -A test_task worker -B"
     depends_on:
-      - db
-      - redis
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      test_task:
+        condition: service_healthy

@@ -25,7 +25,7 @@ SECRET_KEY = '=a4ms8=m-m_4k^)d72k+*rr2%2@3)3+r8@_3pk238iydwl3lb*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['172.17.0.1']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -133,8 +133,11 @@ AUTH_USER_MODEL = 'users.User'
 LOGIN_REDIRECT_URL = '/notifications/'
 LOGIN_URL = '/login/'
 
-CELERY_BROKER_URL = 'redis://redis:6379'
-CELERY_RESULT_BACKEND = 'redis://redis:6379'
+REDIS_HOST = 'redis'
+REDIS_PORT = 6379
+
+CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}'
+CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}'
 
 GMAIL_SMTP_HOST = 'smtp.gmail.com'
 GMAIL_SMTP_PORT = 465

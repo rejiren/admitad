@@ -18,7 +18,7 @@
     <tr>
       <th scope="row">{{ forloop.counter }}</th>
       <td>
-          {{ notification.id }}<b>{{ notification.title }}</b> <span>{{ notification.get_status_display }}</span><br/>
+          <span><b>{{ notification.title }}</b> </span> <span class="badge badge-light">{{ notification.get_status_display|lower }}</span><br/>
           <span>{{ notification.onset_at }}</span>
           <span>{{ notification.creator.email }}</span>
       </td>
@@ -28,7 +28,7 @@
       </td>
       <td>
           {% for participant in notification.participant_set.all %}
-          {{ participant.user.email }}{{ participant.id }}{{ participant.status }} {{ participant.get_status_display }}<br/>
+          {{ participant.user.email }}<span class="badge badge-light"> {{ participant.get_status_display|lower }}</span><br/>
           {% endfor %}
       </td>
       <td>
@@ -36,8 +36,8 @@
           <div class="btn-group" role="group" aria-label="Basic example">
               <a href="{% url 'notification-edit' notification.id %}" role="button" class="btn btn-secondary btn-primary">Edit</a>
               <a href="{% url 'notification-delete' notification.id %}" role="button" class="btn btn-secondary btn-warning">Delete</a>
-            </div>
-{% endif %}
+          </div>
+          {% endif %}
       </td>
     </tr>
     {% endfor %}
