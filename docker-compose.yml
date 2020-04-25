@@ -7,6 +7,8 @@ services:
        MYSQL_USER: 'test_task'
        MYSQL_PASSWORD: 'psswd123'
        MYSQL_ROOT_PASSWORD: 'psswd123'
+    volumes:
+      - ./ci/db/local.cnf:/etc/mysql/conf.d/custom.cnf
     ports:
       - "3306:3306"
     healthcheck:
