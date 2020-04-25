@@ -18,8 +18,8 @@ class IndexView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         return self.model.objects.order_by('-onset_at').prefetch_related('participants').filter(
-            Q(creator=self.request.user) | Q(participant__user=self.request.user)
-        )
+            Q(participant__user=self.request.user) | Q(creator=self.request.user)
+        ).distinct()
 
 
 class NotificationCreate(LoginRequiredMixin, generic.CreateView):
