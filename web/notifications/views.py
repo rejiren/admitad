@@ -2,10 +2,10 @@ from django.conf import settings
 from django.urls import reverse_lazy
 from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 
 from .models import Notification
 from .forms import NotificationForm
-from django.db.models import Q
 
 
 class IndexView(LoginRequiredMixin, generic.ListView):
