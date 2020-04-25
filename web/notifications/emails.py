@@ -15,7 +15,7 @@ def send_email(to_addr, subject, body_text):
     server = smtplib.SMTP_SSL(settings.GMAIL_SMTP_HOST, settings.GMAIL_SMTP_PORT)
     server.ehlo()
     server.login(settings.GMAIL_SMTP_USER, settings.GMAIL_SMTP_PASSWORD)
-    server.sendmail(from_addr, [to_addr], body)
+    server.sendmail(from_addr, [to_addr], body.encode("utf-8"))
     server.quit()
 
 
