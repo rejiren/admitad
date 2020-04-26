@@ -28,16 +28,28 @@
       </td>
       <td>
           {% for participant in notification.participant_set.all %}
-          {{ participant.user.email }}<span class="badge badge-light"> {{ participant.get_status_display|lower }}</span><br/>
+          {{ participant.user.email }}<span class="badge badge-light"> {{ participant.get_status_display|lower }}
+          {% if participant.user == user %}
+
+          <a href="{% url 'change-participant-status' participant.id %}">
+          {% if participant.status %}
+              decline
+          {% else %}
+              accept
+          {% endif %}
+          </a>
+          {% endif %}
+          </span>
+          <br/>
           {% endfor %}
       </td>
       <td>
+          <div class="btn-group" role="group">
           {% if user == notification.creator %}
-          <div class="btn-group" role="group" aria-label="Basic example">
               <a href="{% url 'notification-edit' notification.id %}" role="button" class="btn btn-secondary btn-primary">Edit</a>
               <a href="{% url 'notification-delete' notification.id %}" role="button" class="btn btn-secondary btn-warning">Delete</a>
-          </div>
           {% endif %}
+          </div>
       </td>
     </tr>
     {% endfor %}

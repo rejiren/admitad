@@ -40,6 +40,7 @@ def process_notification():
         participants_emails = [
             participant.user.email for participant in
             notification.participant_set.filter(status=ParticipantStatus.ACTIVE)
+            if participant.status
         ]
         participants_emails.append(notification.creator.email)
 
