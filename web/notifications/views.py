@@ -3,15 +3,18 @@ from django.urls import reverse_lazy
 from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from django.views.generic.base import RedirectView
 
-from .models import Notification
+from .models import Notification, Participant, ParticipantStatus
 from .forms import NotificationForm
 
 
-class IndexView(LoginRequiredMixin, generic.ListView):
+class NotificationLoginRequiredMixin(LoginRequiredMixin):
     login_url = settings.LOGIN_URL
-    redirect_field_name = 'redirect_to'
 
+
+class IndexView(NotificationLoginRequiredMixin, generic.ListView):
     template_name = 'notifications/list.html'
     context_object_name = 'notifications'
     model = Notification
@@ -22,43 +25,47 @@ class IndexView(LoginRequiredMixin, generic.ListView):
         ).distinct()
 
 
-class NotificationCreate(LoginRequiredMixin, generic.CreateView):
+class NotificationCreate(NotificationLoginRequiredMixin, generic.CreateView):
     form_class = NotificationForm
     template_name = 'notifications/form.html'
     success_url = reverse_lazy('notification-list')
-    login_url = settings.LOGIN_URL
 
-    def form_valid(self, form):
-        self.object = form.save(commit=False)
-        self.object.creator = self.request.user
-        return super().form_valid(form)
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs.update({'user': self.request.user})
-        return kwargs
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['creator'] = self.request.user
+        return initial
 
 
-class NotificationMixin:
+class NotificationEdit(NotificationLoginRequiredMixin, generic.UpdateView):
+    form_class = NotificationForm
+    template_name = 'notifications/form.html'
+    success_url = reverse_lazy('notification-list')
+    model = Notification
+
+    def get_queryset(self):
+        return super().get_queryset().filter(creator=self.request.user)
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['creator'] = self.request.user
+        return initial
+
+
+class NotificationDelete(NotificationLoginRequiredMixin, generic.DeleteView):
+    template_name = 'notifications/delete_confirm.html'
+    success_url = reverse_lazy('notification-list')
     model = Notification
 
     def get_queryset(self):
         return super().get_queryset().filter(creator=self.request.user)
 
 
-class NotificationEdit(NotificationMixin, LoginRequiredMixin, generic.UpdateView):
-    login_url = settings.LOGIN_URL
-    form_class = NotificationForm
-    template_name = 'notifications/form.html'
-    success_url = reverse_lazy('notification-list')
+class ChangeParticipantStatusView(NotificationLoginRequiredMixin, RedirectView):
+    permanent = False
+    pattern_name = 'notification-list'
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs.update({'user': self.request.user})
-        return kwargs
-
-
-class NotificationDelete(NotificationMixin, LoginRequiredMixin, generic.DeleteView):
-    login_url = settings.LOGIN_URL
-    template_name = 'notifications/delete_confirm.html'
-    success_url = reverse_lazy('notification-list')
+    def get(self, *args, **kwargs):
+        participant = get_object_or_404(Participant, pk=kwargs.pop('pk'), user=self.request.user)
+        participant.status = ParticipantStatus.REJECTED if participant.status else ParticipantStatus.ACTIVE
+        participant.save()
+        return super().get(*args, **kwargs)

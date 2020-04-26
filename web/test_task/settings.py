@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -146,3 +147,5 @@ GMAIL_SMTP_HOST = 'smtp.gmail.com'
 GMAIL_SMTP_PORT = 465
 GMAIL_SMTP_PASSWORD = '^8yh_09JK'
 GMAIL_SMTP_USER = 'admitad.test.task@gmail.com'
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
